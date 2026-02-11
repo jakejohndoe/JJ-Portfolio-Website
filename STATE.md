@@ -16,6 +16,25 @@
 
 ## ✅ Completed Changes
 
+### February 11, 2026 - Fixed Serverless Function Crash (v2.2.4)
+- **Fixed FUNCTION_INVOCATION_FAILED error**
+  - Root cause: Dependency issues with resend package on Vercel serverless
+  - Rewrote /api/contact.ts to use fetch() directly instead of resend npm package
+  - Eliminated ALL external dependencies except @vercel/node
+  - Now uses Resend's REST API directly via fetch (built into Node.js 18+)
+
+- **Simplified serverless function**
+  - Removed resend package from root package.json
+  - Cleaner, more reliable implementation with zero dependency issues
+  - Direct HTTP calls to https://api.resend.com/emails
+  - Proper error handling and JSON responses for all paths
+
+- **Improved reliability**
+  - No npm packages to fail during serverless function cold starts
+  - Simpler deployment with fewer moving parts
+  - fetch() is native to Node.js 18+ (no polyfills needed)
+  - Build passes successfully
+
 ### February 11, 2026 - Fixed Contact Form 308 Redirect Issue (v2.2.3)
 - **Fixed contact form failing due to 308 redirect**
   - Root cause: hellojakejohn.com redirects to www.hellojakejohn.com
@@ -287,4 +306,4 @@ curl -X POST https://hellojakejohn.com/api/contact \
 ```
 
 ---
-*Last Updated: February 11, 2026 - v2.2.3 Contact Form Redirect Issue Fixed*
+*Last Updated: February 11, 2026 - v2.2.4 Serverless Function Crash Fixed*

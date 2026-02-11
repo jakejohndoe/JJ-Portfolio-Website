@@ -1,108 +1,41 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Resend } from 'resend';
 
-// Wrap entire handler in try-catch to ensure JSON responses
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  try {
-    // Initialize Resend
-    const resend = new Resend(process.env.RESEND_API_KEY);
+  // Set CORS headers
+  const origin = req.headers.origin || '';
+  const allowedOrigins = [
+    'https://www.hellojakejohn.com',
+    'https://hellojakejohn.com',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ];
 
-    // CORS headers - accept both www and non-www domains
-    const origin = req.headers.origin || req.headers.referer || '';
-    const allowedOrigins = [
-      'https://hellojakejohn.com',
-      'https://www.hellojakejohn.com',
-      'http://localhost:5173', // Vite dev server
-      'http://localhost:3000'
-    ];
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else if (process.env.NODE_ENV === 'development') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'https://hellojakejohn.com');
+  }
 
-    const corsOrigin = process.env.NODE_ENV === 'development'
-      ? '*'
-      : allowedOrigins.includes(origin) ? origin : 'https://hellojakejohn.com';
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': corsOrigin,
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
+  // Handle OPTIONS request
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({ ok: true });
+  }
 
-    // Handle CORS preflight
-    if (req.method === 'OPTIONS') {
-      Object.entries(corsHeaders).forEach(([key, value]) => {
-        res.setHeader(key, value);
-      });
-      return res.status(200).json({ ok: true });
-    }
-
-    // Set CORS headers for actual request
-    Object.entries(corsHeaders).forEach(([key, value]) => {
-      res.setHeader(key, value);
+  // Only allow POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({
+      success: false,
+      message: 'Method not allowed'
     });
+  }
 
-    // Only allow POST
-    if (req.method !== 'POST') {
-      return res.status(405).json({
-        success: false,
-        message: 'Method not allowed'
-      });
-    }
-
-    // Rate limiting - simple in-memory store
-    const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-    const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
-    const RATE_LIMIT_MAX = 5; // Max 5 submissions per window
-
-    function checkRateLimit(ip: string): { allowed: boolean; resetTime?: number } {
-      const now = Date.now();
-      const userLimit = rateLimitStore.get(ip);
-
-      if (!userLimit || now > userLimit.resetTime) {
-        // Create new window
-        rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-        return { allowed: true };
-      }
-
-      if (userLimit.count >= RATE_LIMIT_MAX) {
-        return { allowed: false, resetTime: userLimit.resetTime };
-      }
-
-      // Increment count
-      userLimit.count++;
-      return { allowed: true };
-    }
-
-    function getClientIP(req: VercelRequest): string {
-      return (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-             (req.headers['x-real-ip'] as string) ||
-             'unknown';
-    }
-
-    // Simple XSS sanitization
-    function sanitizeInput(str: string): string {
-      if (!str) return '';
-      return str
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#x27;')
-        .replace(/\//g, '&#x2F;');
-    }
-
-    // Rate limiting check
-    const clientIP = getClientIP(req);
-    const rateLimit = checkRateLimit(clientIP);
-
-    if (!rateLimit.allowed) {
-      const resetTime = rateLimit.resetTime ? new Date(rateLimit.resetTime) : new Date();
-      return res.status(429).json({
-        success: false,
-        message: `Too many requests. Please try again after ${resetTime.toLocaleTimeString()}.`,
-        retryAfter: Math.ceil((rateLimit.resetTime! - Date.now()) / 1000)
-      });
-    }
-
-    // Parse request body
-    const { name, email, subject = '', message } = req.body || {};
+  try {
+    const { name, email, subject, message } = req.body || {};
 
     // Validate required fields
     if (!name || !email || !message) {
@@ -112,7 +45,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // Validate email format
+    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -121,79 +54,127 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // Sanitize inputs to prevent XSS
-    const sanitizedName = sanitizeInput(name);
-    const sanitizedSubject = sanitizeInput(subject);
-    const sanitizedMessage = sanitizeInput(message);
-
-    // Check for required environment variables
-    if (!process.env.RESEND_API_KEY) {
-      console.error('❌ RESEND_API_KEY not configured');
+    // Check for API key
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error('RESEND_API_KEY not configured');
       return res.status(500).json({
         success: false,
-        message: 'Email service is not configured. Please contact directly: hellojakejohn@gmail.com'
+        message: 'Email service not configured. Please contact directly: hellojakejohn@gmail.com'
       });
     }
 
-    // Send email via Resend
-    const RECIPIENT_EMAIL = process.env.RECIPIENT_EMAIL || 'hellojakejohn@gmail.com';
-    const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
-
-    try {
-      const emailResponse = await resend.emails.send({
-        from: `Portfolio Contact <${FROM_EMAIL}>`,
-        to: [RECIPIENT_EMAIL],
-        replyTo: email,
-        subject: `Portfolio Contact: ${sanitizedSubject || 'No Subject'}`,
+    // Send email using Resend REST API
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: `Portfolio Contact <${process.env.FROM_EMAIL || 'onboarding@resend.dev'}>`,
+        to: [process.env.RECIPIENT_EMAIL || 'hellojakejohn@gmail.com'],
+        reply_to: email,
+        subject: `Portfolio Contact: ${subject || 'No Subject'}`,
         html: `
           <!DOCTYPE html>
           <html>
             <head>
               <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
-                .container { max-width: 600px; margin: 0 auto; }
-                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
-                .content { background: #f8f9fa; padding: 30px; }
-                .field { margin-bottom: 25px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-                .label { font-weight: 600; color: #555; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-                .value { color: #222; font-size: 16px; }
-                .message-box { background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; margin-top: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; background: #fff; border-top: 1px solid #e0e0e0; }
-                a { color: #667eea; text-decoration: none; }
-                a:hover { text-decoration: underline; }
+                body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                  line-height: 1.6;
+                  color: #333;
+                  margin: 0;
+                  padding: 20px;
+                  background-color: #f5f5f5;
+                }
+                .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  background: white;
+                  border-radius: 10px;
+                  overflow: hidden;
+                  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                }
+                .header {
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  color: white;
+                  padding: 30px;
+                  text-align: center;
+                }
+                .header h1 {
+                  margin: 0;
+                  font-size: 24px;
+                }
+                .content {
+                  padding: 30px;
+                }
+                .field {
+                  margin-bottom: 20px;
+                  padding: 15px;
+                  background: #f8f9fa;
+                  border-radius: 5px;
+                }
+                .label {
+                  font-weight: 600;
+                  color: #555;
+                  margin-bottom: 5px;
+                  text-transform: uppercase;
+                  font-size: 12px;
+                  letter-spacing: 0.5px;
+                }
+                .value {
+                  color: #222;
+                  font-size: 16px;
+                }
+                .message-box {
+                  background: #f8f9fa;
+                  padding: 20px;
+                  border-radius: 5px;
+                  border-left: 4px solid #667eea;
+                  margin-top: 20px;
+                }
+                .footer {
+                  text-align: center;
+                  padding: 20px;
+                  color: #999;
+                  font-size: 12px;
+                  background: #f8f9fa;
+                }
               </style>
             </head>
             <body>
               <div class="container">
                 <div class="header">
-                  <h1 style="margin: 0; font-size: 28px;">📬 New Contact Form Submission</h1>
+                  <h1>📬 New Contact Form Submission</h1>
                 </div>
                 <div class="content">
                   <div class="field">
-                    <div class="label">From</div>
-                    <div class="value">${sanitizedName}</div>
+                    <div class="label">Name</div>
+                    <div class="value">${name}</div>
                   </div>
                   <div class="field">
                     <div class="label">Email</div>
-                    <div class="value"><a href="mailto:${email}">${email}</a></div>
+                    <div class="value"><a href="mailto:${email}" style="color: #667eea;">${email}</a></div>
                   </div>
-                  ${sanitizedSubject ? `
+                  ${subject ? `
                   <div class="field">
                     <div class="label">Subject</div>
-                    <div class="value">${sanitizedSubject}</div>
+                    <div class="value">${subject}</div>
                   </div>
                   ` : ''}
                   <div class="message-box">
-                    <div class="label" style="margin-bottom: 12px;">Message</div>
-                    <div class="value" style="white-space: pre-wrap; line-height: 1.8;">${sanitizedMessage.replace(/\n/g, '<br>')}</div>
+                    <div class="label" style="margin-bottom: 10px;">Message</div>
+                    <div class="value" style="white-space: pre-wrap;">${message.replace(/\n/g, '<br>')}</div>
                   </div>
                 </div>
                 <div class="footer">
-                  <p>Sent from hellojakejohn.com at ${new Date().toLocaleString('en-US', {
+                  Sent from hellojakejohn.com at ${new Date().toLocaleString('en-US', {
                     timeZone: 'America/Los_Angeles',
                     dateStyle: 'full',
                     timeStyle: 'short'
-                  })}</p>
+                  })}
                 </div>
               </div>
             </body>
@@ -202,9 +183,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         text: `
 New Contact Form Submission
 
-From: ${sanitizedName}
+Name: ${name}
 Email: ${email}
-${sanitizedSubject ? `Subject: ${sanitizedSubject}` : ''}
+${subject ? `Subject: ${subject}` : ''}
 
 Message:
 ${message}
@@ -212,32 +193,31 @@ ${message}
 ---
 Sent from hellojakejohn.com at ${new Date().toLocaleString()}
         `
-      });
+      }),
+    });
 
-      console.log(`✅ Email sent via Resend (ID: ${emailResponse.data?.id})`);
+    const responseData = await response.json();
 
-      return res.status(201).json({
-        success: true,
-        message: "Thank you for your message! I'll get back to you soon."
-      });
-
-    } catch (emailError: any) {
-      console.error('❌ Resend email failed:', emailError);
-
+    if (!response.ok) {
+      console.error('Resend API error:', responseData);
       return res.status(500).json({
         success: false,
-        message: 'Failed to send your message. Please try again or email directly: hellojakejohn@gmail.com',
-        error: process.env.NODE_ENV === 'development' ? emailError.message : undefined
+        message: 'Failed to send email. Please try again or contact directly.'
       });
     }
 
-  } catch (error: any) {
-    // Top-level error handler - ensures ALL errors return JSON
-    console.error('❌ Contact form handler error:', error);
+    console.log(`Email sent successfully: ${responseData.id}`);
 
+    return res.status(200).json({
+      success: true,
+      message: "Thank you for your message! I'll get back to you soon."
+    });
+
+  } catch (error: any) {
+    console.error('Contact form error:', error);
     return res.status(500).json({
       success: false,
-      message: 'An unexpected error occurred. Please try again or email directly: hellojakejohn@gmail.com',
+      message: 'An error occurred while processing your request.',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
