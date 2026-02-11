@@ -3,6 +3,7 @@
 ## 📍 Current Architecture Overview
 
 ### Deployment
+
 - **Platform**: Vercel (100% serverless)
 - **Frontend**: React + TypeScript + Vite (static)
 - **API**: Single serverless function at `/api/contact`
@@ -10,13 +11,15 @@
 - **CDN**: Vercel Edge Network
 
 ### Live URLs & Services
-- **Production**: https://hellojakejohn.com
-- **Vercel Dashboard**: https://vercel.com/dashboard
-- **Resend Dashboard**: https://resend.com/emails
+
+- **Production**: <https://hellojakejohn.com>
+- **Vercel Dashboard**: <https://vercel.com/dashboard>
+- **Resend Dashboard**: <https://resend.com/emails>
 
 ## ✅ Completed Changes
 
 ### February 11, 2026 - Fixed Serverless Function Crash (v2.2.4)
+
 - **Fixed FUNCTION_INVOCATION_FAILED error**
   - Root cause: Dependency issues with resend package on Vercel serverless
   - Rewrote /api/contact.ts to use fetch() directly instead of resend npm package
@@ -26,7 +29,7 @@
 - **Simplified serverless function**
   - Removed resend package from root package.json
   - Cleaner, more reliable implementation with zero dependency issues
-  - Direct HTTP calls to https://api.resend.com/emails
+  - Direct HTTP calls to <https://api.resend.com/emails>
   - Proper error handling and JSON responses for all paths
 
 - **Improved reliability**
@@ -36,8 +39,9 @@
   - Build passes successfully
 
 ### February 11, 2026 - Fixed Contact Form 308 Redirect Issue (v2.2.3)
+
 - **Fixed contact form failing due to 308 redirect**
-  - Root cause: hellojakejohn.com redirects to www.hellojakejohn.com
+  - Root cause: hellojakejohn.com redirects to <www.hellojakejohn.com>
   - POST body gets lost during 308 redirect
   - Added `redirect: 'follow'` to fetch options in ContactSection.tsx
   - Improved response handling to check for JSON content-type
@@ -46,7 +50,7 @@
 - **Enhanced CORS configuration**
   - API now accepts requests from both www and non-www domains
   - Dynamic CORS origin based on request origin
-  - Supports: hellojakejohn.com, www.hellojakejohn.com, localhost:5173, localhost:3000
+  - Supports: hellojakejohn.com, <www.hellojakejohn.com>, localhost:5173, localhost:3000
 
 - **Cleaned up /api directory**
   - Removed all unnecessary proxy files (direct-proxy.js, echo.js, health.js, proxy.js, simple-proxy.js, skills.js)
@@ -59,6 +63,7 @@
   - Console logging for debugging non-JSON responses
 
 ### February 11, 2026 - Fixed Contact Form 500 Error (v2.2.2)
+
 - **Fixed contact form 500 Internal Server Error**
   - Root cause: Improper error handling returning non-JSON responses
   - Fixed TypeScript imports: Changed to `import type { VercelRequest, VercelResponse }`
@@ -80,6 +85,7 @@
   - Build passes without errors
 
 ### February 11, 2026 - Fixed Contact Form 404 & Image Issues (v2.2.1)
+
 - **Fixed contact form 404 error on production**
   - Root cause: vercel.json was rewriting ALL routes (including /api) to /index.html
   - Fixed by updating vercel.json with proper configuration:
@@ -98,6 +104,7 @@
   - Rewrites properly exclude /api/* routes from SPA handling
 
 ### February 11, 2026 - MongoDB Removal & Stack Simplification (v2.2.0)
+
 - **Removed MongoDB entirely**
   - Deleted all MongoDB/mongoose connection code from `/api/contact.ts`
   - Removed mongodb dependency from package.json
@@ -118,6 +125,7 @@
 ## ✅ Completed Changes
 
 ### February 10, 2026 - Content & UX Improvements (v2.1.0)
+
 - **Content accuracy improvements**
   - Updated skills data with accurate Web3 & Tools categories (29 total skills)
   - Fixed empty skill filters - Web3 and Tools sections now populate correctly
@@ -138,6 +146,7 @@
   - Reduced floating code opacity by ~20% for better visual balance
 
 ### February 10, 2026 - Major Web3 Redesign & Overhaul (v2.0.0)
+
 - **Complete visual redesign** with Web3/cyber aesthetic
   - New color palette: Cyan (#00FFD6), Purple (#8E44FF), Green (#00FF7D)
   - Typography: Space Grotesk + JetBrains Mono
@@ -164,6 +173,7 @@
   - Updated contact API with better error handling
 
 ### February 10, 2024 - Initial Migration
+
 - **Migrated from Render to Vercel serverless**
   - Created `/api/contact.ts` serverless function
   - Removed Render.com proxy from `vercel.json`
@@ -184,6 +194,7 @@
   - Direct data imports instead of fetching
 
 ### February 10, 2024 - Performance Overhaul
+
 - **Removed 36 unused UI components** (78% reduction)
   - Deleted: accordion, alert, calendar, carousel, chart, command, dialog, drawer, etc.
   - Kept only 10 essential components: button, skeleton, card, form, input, textarea, toast, toaster, tooltip, label
@@ -230,6 +241,7 @@
 ## ⚠️ IMPORTANT DEPLOYMENT NOTES
 
 ### Vercel Project Settings
+
 - **DO NOT** set "Root Directory" in Vercel project settings (leave empty)
 - **DO NOT** override Build & Output Settings in Vercel dashboard
 - Let vercel.json handle all configuration
@@ -238,6 +250,7 @@
 ## 📋 Environment Variables
 
 ### Vercel (Production) - Only 3 env vars needed
+
 ```bash
 RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx      # Resend API key (required)
 RECIPIENT_EMAIL=hellojakejohn@gmail.com     # Contact form recipient
@@ -245,6 +258,7 @@ FROM_EMAIL=contact@hellojakejohn.com        # Sender email (optional, defaults t
 ```
 
 ### Local Development (.env)
+
 ```bash
 RESEND_API_KEY=                             # Add your Resend API key for testing
 RECIPIENT_EMAIL=hellojakejohn@gmail.com     # Where to send emails
@@ -254,6 +268,7 @@ FROM_EMAIL=contact@hellojakejohn.com        # Sender address (optional)
 ## 🎯 Next Steps / TODO
 
 ### Immediate (Performance)
+
 - [ ] Remove unused UI components (est. -200KB)
 - [ ] Clean up package.json dependencies
 - [ ] Add React.lazy() for below-fold sections
@@ -262,15 +277,17 @@ FROM_EMAIL=contact@hellojakejohn.com        # Sender address (optional)
 - [ ] Analyze and optimize bundle size
 
 ### Future Enhancements
+
 - [ ] Add Sentry error tracking
 - [ ] Implement ISG for better SEO
 - [ ] Add analytics (Vercel Analytics)
-- [ ] Progressive enhancement
+- [ ] Progressive enhancements
 - [ ] Service worker for offline support
 
 ## 📊 Performance Stats
 
 ### Bundle Size (After v2.0.0 Overhaul)
+
 - **Total Build**: 575.56 KB → **147KB gzipped** (74% reduction)
 - **Main JS**: 273.97 KB (88.92 KB gzipped)
 - **Main CSS**: 52.06 KB (9.86 KB gzipped)
@@ -281,6 +298,7 @@ FROM_EMAIL=contact@hellojakejohn.com        # Sender address (optional)
   - ProjectsSection: 6.89 KB (2.49 KB gzipped)
 
 ### Improvements Summary (v2.0.0)
+
 - **Design**: Complete Web3/cyber aesthetic transformation
 - **Performance**: framer-motion removed, CSS animations added
 - **Security**: Rate limiting, enhanced XSS protection
