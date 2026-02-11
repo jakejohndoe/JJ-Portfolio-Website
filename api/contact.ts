@@ -7,11 +7,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Initialize Resend
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // CORS headers
+    // CORS headers - accept both www and non-www domains
+    const origin = req.headers.origin || req.headers.referer || '';
+    const allowedOrigins = [
+      'https://hellojakejohn.com',
+      'https://www.hellojakejohn.com',
+      'http://localhost:5173', // Vite dev server
+      'http://localhost:3000'
+    ];
+
+    const corsOrigin = process.env.NODE_ENV === 'development'
+      ? '*'
+      : allowedOrigins.includes(origin) ? origin : 'https://hellojakejohn.com';
+
     const corsHeaders = {
-      'Access-Control-Allow-Origin': process.env.NODE_ENV === 'development'
-        ? '*'
-        : 'https://hellojakejohn.com',
+      'Access-Control-Allow-Origin': corsOrigin,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };

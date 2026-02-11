@@ -16,6 +16,29 @@
 
 ## ✅ Completed Changes
 
+### February 11, 2026 - Fixed Contact Form 308 Redirect Issue (v2.2.3)
+- **Fixed contact form failing due to 308 redirect**
+  - Root cause: hellojakejohn.com redirects to www.hellojakejohn.com
+  - POST body gets lost during 308 redirect
+  - Added `redirect: 'follow'` to fetch options in ContactSection.tsx
+  - Improved response handling to check for JSON content-type
+  - Added error handling for non-JSON responses
+
+- **Enhanced CORS configuration**
+  - API now accepts requests from both www and non-www domains
+  - Dynamic CORS origin based on request origin
+  - Supports: hellojakejohn.com, www.hellojakejohn.com, localhost:5173, localhost:3000
+
+- **Cleaned up /api directory**
+  - Removed all unnecessary proxy files (direct-proxy.js, echo.js, health.js, proxy.js, simple-proxy.js, skills.js)
+  - Removed subdirectories (echo/, health/, skills/)
+  - Only /api/contact.ts remains (single serverless function)
+
+- **Improved error handling**
+  - Frontend checks content-type before parsing JSON
+  - Better error messages for redirect/server issues
+  - Console logging for debugging non-JSON responses
+
 ### February 11, 2026 - Fixed Contact Form 500 Error (v2.2.2)
 - **Fixed contact form 500 Internal Server Error**
   - Root cause: Improper error handling returning non-JSON responses
@@ -264,4 +287,4 @@ curl -X POST https://hellojakejohn.com/api/contact \
 ```
 
 ---
-*Last Updated: February 11, 2026 - v2.2.2 Contact Form 500 Error Fixed*
+*Last Updated: February 11, 2026 - v2.2.3 Contact Form Redirect Issue Fixed*

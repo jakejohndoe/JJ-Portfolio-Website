@@ -52,9 +52,20 @@ const ContactSection = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(sanitizedData),
+        redirect: 'follow', // Handle redirects properly
       });
 
-      const responseData = await response.json();
+      // Handle response - check if it's JSON
+      let responseData;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        responseData = await response.json();
+      } else {
+        // If not JSON, likely an error page or redirect issue
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        throw new Error('Server returned an invalid response. Please try again.');
+      }
 
       if (!response.ok) {
         throw new Error(responseData.message || 'Failed to send message');
