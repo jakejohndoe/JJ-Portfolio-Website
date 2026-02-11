@@ -16,6 +16,24 @@
 
 ## ✅ Completed Changes
 
+### February 11, 2026 - Fixed Contact Form 404 & Image Issues (v2.2.1)
+- **Fixed contact form 404 error on production**
+  - Root cause: vercel.json was rewriting ALL routes (including /api) to /index.html
+  - Fixed by updating vercel.json with proper configuration:
+    - Added buildCommand and outputDirectory for client build
+    - Changed rewrite rule to exclude /api routes: `/((?!api/).*)`
+    - Now /api/contact serverless function is accessible
+
+- **Fixed ReWork Solutions broken image**
+  - Replaced broken og:image URL with styled gradient placeholder
+  - Used warm orange gradient (#FF6B6B → #FF9252 → #FCA820) to match AI/professional theme
+  - Consistent with Welp Network's gradient placeholder approach
+
+- **Vercel configuration corrected**
+  - buildCommand: `cd client && npm install && npm run build`
+  - outputDirectory: `client/dist`
+  - Rewrites properly exclude /api/* routes from SPA handling
+
 ### February 11, 2026 - MongoDB Removal & Stack Simplification (v2.2.0)
 - **Removed MongoDB entirely**
   - Deleted all MongoDB/mongoose connection code from `/api/contact.ts`
@@ -146,6 +164,14 @@
    - Could implement service worker for offline support
    - Could add more sophisticated rate limiting with Redis
 
+## ⚠️ IMPORTANT DEPLOYMENT NOTES
+
+### Vercel Project Settings
+- **DO NOT** set "Root Directory" in Vercel project settings (leave empty)
+- **DO NOT** override Build & Output Settings in Vercel dashboard
+- Let vercel.json handle all configuration
+- Remove any VITE_API_BASE_URL environment variable (no longer needed)
+
 ## 📋 Environment Variables
 
 ### Vercel (Production) - Only 3 env vars needed
@@ -217,4 +243,4 @@ curl -X POST https://hellojakejohn.com/api/contact \
 ```
 
 ---
-*Last Updated: February 11, 2026 - v2.2.0 MongoDB Removed - Pure Vercel + Resend Stack*
+*Last Updated: February 11, 2026 - v2.2.1 Contact Form & Images Fixed*

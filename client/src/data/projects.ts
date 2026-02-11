@@ -54,7 +54,7 @@ export const projects: Project[] = [
       { name: 'Stripe' },
       { name: 'Material-UI' }
     ],
-    image: 'https://rework.solutions/og-image.png',
+    image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2NzUiIHZpZXdCb3g9IjAgMCAxMjAwIDY3NSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0ib3JhbmdlZ3JhZCIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI0ZGNkI2QiIgLz4KPHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiNGRjkyNTIiIC8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI0ZDQTgyMCIgLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8cmVjdCB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2NzUiIGZpbGw9InVybCgjb3JhbmdlZ3JhZCkiIG9wYWNpdHk9IjAuMiIvPgo8dGV4dCB4PSI2MDAiIHk9IjM1MCIgZmlsbD0iI0ZGNkI2QiIgZm9udC1mYW1pbHk9IkpldEJyYWlucyBNb25vLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iNDgiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5SZVdvcmsgU29sdXRpb25zPC90ZXh0Pgo8dGV4dCB4PSI2MDAiIHk9IjQxMCIgZmlsbD0iI0ZGOTI1MiIgZm9udC1mYW1pbHk9IkpldEJyYWlucyBNb25vLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFJLVBvd2VyZWQgUmVzdW1lIE9wdGltaXphdGlvbjwvdGV4dD4KPC9zdmc+',
     link: 'https://rework.solutions'
   }
 ];
