@@ -2,10 +2,6 @@
   "version": 2,
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "https://hellojakejohn.onrender.com/api/$1"
-    },
-    {
       "src": "/(.*)",
       "dest": "/index.html"
     }

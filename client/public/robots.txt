@@ -1,0 +1,24 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://hellojakejohn.com/sitemap.xml
+
+# Crawl-delay (in seconds)
+Crawl-delay: 1
+
+# Disallow admin routes
+Disallow: /admin/
+Disallow: /api/admin/
+
+# Allow search engines to crawl everything else
+Allow: /blogs
+Allow: /api/contact
+
+# Block bad bots
+User-agent: AhrefsBot
+User-agent: SEMrushBot
+User-agent: DotBot
+User-agent: MJ12bot
+Disallow: /
