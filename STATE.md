@@ -6,15 +6,33 @@
 - **Platform**: Vercel (100% serverless)
 - **Frontend**: React + TypeScript + Vite (static)
 - **API**: Single serverless function at `/api/contact`
-- **Database**: MongoDB Atlas (contact form backups)
-- **Email**: Resend API
+- **Email**: Resend API (only external service)
 - **CDN**: Vercel Edge Network
 
 ### Live URLs & Services
 - **Production**: https://hellojakejohn.com
 - **Vercel Dashboard**: https://vercel.com/dashboard
-- **MongoDB Atlas**: mongodb+srv://jakejohn-portfolio.yvgxdyi.mongodb.net
 - **Resend Dashboard**: https://resend.com/emails
+
+## ✅ Completed Changes
+
+### February 11, 2026 - MongoDB Removal & Stack Simplification (v2.2.0)
+- **Removed MongoDB entirely**
+  - Deleted all MongoDB/mongoose connection code from `/api/contact.ts`
+  - Removed mongodb dependency from package.json
+  - Contact form now only sends emails via Resend (no database backup)
+  - Zero external services except Resend for email
+
+- **Simplified environment variables**
+  - Now only requires 3 env vars: RESEND_API_KEY, RECIPIENT_EMAIL, FROM_EMAIL
+  - Removed MONGODB_URI and JWT_SECRET from all .env files
+  - Updated .env.example with clean configuration
+
+- **Maintained functionality**
+  - Rate limiting (5 requests per 15min) still active
+  - Input validation and XSS sanitization preserved
+  - Error handling and user feedback intact
+  - Build passes with no errors
 
 ## ✅ Completed Changes
 
@@ -130,20 +148,18 @@
 
 ## 📋 Environment Variables
 
-### Vercel (Production)
+### Vercel (Production) - Only 3 env vars needed
 ```bash
-RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx      # Resend API key
-MONGODB_URI=mongodb+srv://...               # MongoDB connection
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx      # Resend API key (required)
 RECIPIENT_EMAIL=hellojakejohn@gmail.com     # Contact form recipient
-FROM_EMAIL=contact@hellojakejohn.com        # Sender email (optional)
+FROM_EMAIL=contact@hellojakejohn.com        # Sender email (optional, defaults to onboarding@resend.dev)
 ```
 
 ### Local Development (.env)
 ```bash
-RESEND_API_KEY=                             # Not set locally
-MONGODB_URI=mongodb+srv://...               # Set
-RECIPIENT_EMAIL=hellojakejohn@gmail.com     # Set
-FROM_EMAIL=contact@hellojakejohn.com        # Set
+RESEND_API_KEY=                             # Add your Resend API key for testing
+RECIPIENT_EMAIL=hellojakejohn@gmail.com     # Where to send emails
+FROM_EMAIL=contact@hellojakejohn.com        # Sender address (optional)
 ```
 
 ## 🎯 Next Steps / TODO
@@ -201,4 +217,4 @@ curl -X POST https://hellojakejohn.com/api/contact \
 ```
 
 ---
-*Last Updated: February 10, 2026 - v2.1.0 Content & UX Improvements Complete*
+*Last Updated: February 11, 2026 - v2.2.0 MongoDB Removed - Pure Vercel + Resend Stack*

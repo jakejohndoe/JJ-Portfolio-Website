@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@vercel/node": "^5.6.1",
-    "mongodb": "^7.1.0",
     "resend": "^6.9.2"
   }
 }
