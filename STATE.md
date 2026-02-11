@@ -16,6 +16,27 @@
 
 ## ✅ Completed Changes
 
+### February 11, 2026 - Fixed Contact Form 500 Error (v2.2.2)
+- **Fixed contact form 500 Internal Server Error**
+  - Root cause: Improper error handling returning non-JSON responses
+  - Fixed TypeScript imports: Changed to `import type { VercelRequest, VercelResponse }`
+  - Wrapped entire handler in top-level try-catch to guarantee JSON responses
+  - All error paths now return proper JSON with status codes
+  - Added null checks for sanitizeInput function
+  - Moved rate limit store inside handler to avoid persistence issues
+  - Improved IP detection with x-real-ip fallback
+
+- **Enhanced error handling**
+  - Every code path returns JSON (never raw text/HTML)
+  - OPTIONS requests return JSON instead of just status
+  - Better error messages for missing environment variables
+  - Conditional error details based on NODE_ENV
+
+- **Verified dependencies**
+  - Confirmed resend and @vercel/node in root package.json
+  - npm install successful at root level
+  - Build passes without errors
+
 ### February 11, 2026 - Fixed Contact Form 404 & Image Issues (v2.2.1)
 - **Fixed contact form 404 error on production**
   - Root cause: vercel.json was rewriting ALL routes (including /api) to /index.html
@@ -243,4 +264,4 @@ curl -X POST https://hellojakejohn.com/api/contact \
 ```
 
 ---
-*Last Updated: February 11, 2026 - v2.2.1 Contact Form & Images Fixed*
+*Last Updated: February 11, 2026 - v2.2.2 Contact Form 500 Error Fixed*

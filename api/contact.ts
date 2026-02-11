@@ -1,95 +1,98 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Resend } from 'resend';
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-// CORS headers
-const corsHeaders = {
-  'Access-Control-Allow-Origin': process.env.NODE_ENV === 'development'
-    ? '*'
-    : 'https://hellojakejohn.com',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
-// Rate limiting - simple in-memory store
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
-const RATE_LIMIT_MAX = 5; // Max 5 submissions per window
-
-function checkRateLimit(ip: string): { allowed: boolean; resetTime?: number } {
-  const now = Date.now();
-  const userLimit = rateLimitStore.get(ip);
-
-  if (!userLimit || now > userLimit.resetTime) {
-    // Create new window
-    rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return { allowed: true };
-  }
-
-  if (userLimit.count >= RATE_LIMIT_MAX) {
-    return { allowed: false, resetTime: userLimit.resetTime };
-  }
-
-  // Increment count
-  userLimit.count++;
-  return { allowed: true };
-}
-
-function getClientIP(req: VercelRequest): string {
-  return (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-         req.connection?.remoteAddress ||
-         'unknown';
-}
-
-// Simple XSS sanitization
-function sanitizeInput(str: string): string {
-  return str
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;');
-}
-
+// Wrap entire handler in try-catch to ensure JSON responses
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return res.status(200).setHeader('Access-Control-Allow-Origin', corsHeaders['Access-Control-Allow-Origin'])
-      .setHeader('Access-Control-Allow-Methods', corsHeaders['Access-Control-Allow-Methods'])
-      .setHeader('Access-Control-Allow-Headers', corsHeaders['Access-Control-Allow-Headers'])
-      .end();
-  }
-
-  // Only allow POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({
-      success: false,
-      message: 'Method not allowed'
-    });
-  }
-
-  // Set CORS headers for actual request
-  Object.entries(corsHeaders).forEach(([key, value]) => {
-    res.setHeader(key, value);
-  });
-
-  // Rate limiting check
-  const clientIP = getClientIP(req);
-  const rateLimit = checkRateLimit(clientIP);
-
-  if (!rateLimit.allowed) {
-    const resetTime = rateLimit.resetTime ? new Date(rateLimit.resetTime) : new Date();
-    return res.status(429).json({
-      success: false,
-      message: `Too many requests. Please try again after ${resetTime.toLocaleTimeString()}.`,
-      retryAfter: Math.ceil((rateLimit.resetTime! - Date.now()) / 1000)
-    });
-  }
-
   try {
-    const { name, email, subject = '', message } = req.body;
+    // Initialize Resend
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    // CORS headers
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': process.env.NODE_ENV === 'development'
+        ? '*'
+        : 'https://hellojakejohn.com',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
+
+    // Handle CORS preflight
+    if (req.method === 'OPTIONS') {
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        res.setHeader(key, value);
+      });
+      return res.status(200).json({ ok: true });
+    }
+
+    // Set CORS headers for actual request
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      res.setHeader(key, value);
+    });
+
+    // Only allow POST
+    if (req.method !== 'POST') {
+      return res.status(405).json({
+        success: false,
+        message: 'Method not allowed'
+      });
+    }
+
+    // Rate limiting - simple in-memory store
+    const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+    const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
+    const RATE_LIMIT_MAX = 5; // Max 5 submissions per window
+
+    function checkRateLimit(ip: string): { allowed: boolean; resetTime?: number } {
+      const now = Date.now();
+      const userLimit = rateLimitStore.get(ip);
+
+      if (!userLimit || now > userLimit.resetTime) {
+        // Create new window
+        rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+        return { allowed: true };
+      }
+
+      if (userLimit.count >= RATE_LIMIT_MAX) {
+        return { allowed: false, resetTime: userLimit.resetTime };
+      }
+
+      // Increment count
+      userLimit.count++;
+      return { allowed: true };
+    }
+
+    function getClientIP(req: VercelRequest): string {
+      return (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+             (req.headers['x-real-ip'] as string) ||
+             'unknown';
+    }
+
+    // Simple XSS sanitization
+    function sanitizeInput(str: string): string {
+      if (!str) return '';
+      return str
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .replace(/\//g, '&#x2F;');
+    }
+
+    // Rate limiting check
+    const clientIP = getClientIP(req);
+    const rateLimit = checkRateLimit(clientIP);
+
+    if (!rateLimit.allowed) {
+      const resetTime = rateLimit.resetTime ? new Date(rateLimit.resetTime) : new Date();
+      return res.status(429).json({
+        success: false,
+        message: `Too many requests. Please try again after ${resetTime.toLocaleTimeString()}.`,
+        retryAfter: Math.ceil((rateLimit.resetTime! - Date.now()) / 1000)
+      });
+    }
+
+    // Parse request body
+    const { name, email, subject = '', message } = req.body || {};
 
     // Validate required fields
     if (!name || !email || !message) {
@@ -100,7 +103,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Validate email format
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid email format'
@@ -207,21 +211,24 @@ Sent from hellojakejohn.com at ${new Date().toLocaleString()}
         message: "Thank you for your message! I'll get back to you soon."
       });
 
-    } catch (emailError) {
+    } catch (emailError: any) {
       console.error('❌ Resend email failed:', emailError);
 
       return res.status(500).json({
         success: false,
-        message: 'Failed to send your message. Please try again or email directly: hellojakejohn@gmail.com'
+        message: 'Failed to send your message. Please try again or email directly: hellojakejohn@gmail.com',
+        error: process.env.NODE_ENV === 'development' ? emailError.message : undefined
       });
     }
 
-  } catch (error) {
-    console.error('❌ Contact form error:', error);
+  } catch (error: any) {
+    // Top-level error handler - ensures ALL errors return JSON
+    console.error('❌ Contact form handler error:', error);
+
     return res.status(500).json({
       success: false,
-      message: 'Failed to process your message. Please try again or email directly: hellojakejohn@gmail.com',
-      error: error instanceof Error ? error.message : 'Server error'
+      message: 'An unexpected error occurred. Please try again or email directly: hellojakejohn@gmail.com',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 }
