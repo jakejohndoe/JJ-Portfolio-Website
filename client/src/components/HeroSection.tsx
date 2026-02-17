@@ -146,8 +146,9 @@ const HeroSection = () => {
               Web3 Developer & Builder
             </h2>
             <p className="text-lg text-muted-foreground font-mono">
-              <span className="text-primary">Building</span> on the{' '}
-              <span className="text-secondary glitch-text">frontier</span> of tech
+              <span className="text-primary">Bridging</span> Web2{' '}
+              <span className="text-accent">&lt;&gt;</span>{' '}
+              <span className="text-secondary glitch-text">Web3</span>
             </p>
             <div className="flex items-center gap-4 mt-4">
               <div className="flex items-center gap-2">
