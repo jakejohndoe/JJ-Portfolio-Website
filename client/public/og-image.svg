@@ -1,0 +1,64 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0A0A0B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#141416;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00FFD6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8E44FF;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="overlay" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00FFD6;stop-opacity:0.1" />
+      <stop offset="50%" style="stop-color:#8E44FF;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#00FFD6;stop-opacity:0.1" />
+    </linearGradient>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Overlay gradient -->
+  <rect width="1200" height="630" fill="url(#overlay)"/>
+
+  <!-- Grid pattern -->
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Accent lines -->
+  <line x1="100" y1="315" x2="300" y2="315" stroke="#00FFD6" stroke-opacity="0.3" stroke-width="2"/>
+  <line x1="900" y1="315" x2="1100" y2="315" stroke="#8E44FF" stroke-opacity="0.3" stroke-width="2"/>
+
+  <!-- Main Title -->
+  <text x="600" y="260" font-family="system-ui, -apple-system, sans-serif" font-size="90" font-weight="bold" text-anchor="middle" fill="url(#accent)">JAKE JOHN</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="40" font-weight="600" text-anchor="middle" fill="white">Web3 Developer &amp; Builder</text>
+
+  <!-- Tagline -->
+  <text x="470" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle" fill="rgba(255,255,255,0.7)">Bridging Web2</text>
+  <text x="600" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle" fill="#00FFD6">&lt;&gt;</text>
+  <text x="700" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="500" text-anchor="middle" fill="rgba(255,255,255,0.7)">Web3</text>
+
+  <!-- Decorative brackets -->
+  <path d="M 80 180 L 60 180 L 60 450 L 80 450" fill="none" stroke="#00FFD6" stroke-opacity="0.4" stroke-width="3"/>
+  <path d="M 1120 180 L 1140 180 L 1140 450 L 1120 450" fill="none" stroke="#8E44FF" stroke-opacity="0.4" stroke-width="3"/>
+
+  <!-- Tech stack -->
+  <text x="200" y="550" font-family="system-ui, -apple-system, sans-serif" font-size="16" text-anchor="middle" fill="rgba(255,255,255,0.3)">React</text>
+  <text x="400" y="550" font-family="system-ui, -apple-system, sans-serif" font-size="16" text-anchor="middle" fill="rgba(255,255,255,0.3)">TypeScript</text>
+  <text x="600" y="550" font-family="system-ui, -apple-system, sans-serif" font-size="16" text-anchor="middle" fill="rgba(255,255,255,0.3)">Solidity</text>
+  <text x="800" y="550" font-family="system-ui, -apple-system, sans-serif" font-size="16" text-anchor="middle" fill="rgba(255,255,255,0.3)">Node.js</text>
+  <text x="1000" y="550" font-family="system-ui, -apple-system, sans-serif" font-size="16" text-anchor="middle" fill="rgba(255,255,255,0.3)">Web3.js</text>
+
+  <!-- Dots between tech items -->
+  <circle cx="300" cy="545" r="2" fill="#00FFD6" opacity="0.5"/>
+  <circle cx="500" cy="545" r="2" fill="#00FFD6" opacity="0.5"/>
+  <circle cx="700" cy="545" r="2" fill="#00FFD6" opacity="0.5"/>
+  <circle cx="900" cy="545" r="2" fill="#00FFD6" opacity="0.5"/>
+
+  <!-- Website URL -->
+  <text x="600" y="500" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="500" text-anchor="middle" fill="rgba(255,255,255,0.5)">hellojakejohn.com</text>
+</svg>
