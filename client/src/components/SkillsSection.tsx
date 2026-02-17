@@ -10,7 +10,11 @@ import {
   FaGithub,
   FaPython,
   FaDocker,
-  FaAws
+  FaAws,
+  FaLink,
+  FaShieldAlt,
+  FaPaintBrush,
+  FaPlug
 } from "react-icons/fa";
 import {
   SiTypescript,
@@ -24,8 +28,17 @@ import {
   SiSolidity,
   SiEthereum,
   SiWeb3Dotjs,
-  SiIpfs
+  SiIpfs,
+  SiFirebase,
+  SiFigma,
+  SiVercel,
+  SiJest,
+  SiExpress
 } from "react-icons/si";
+import { GiAnvil, GiMiningHelmet } from "react-icons/gi";
+import { MdDevices, MdDesignServices } from "react-icons/md";
+import { IoRainy } from "react-icons/io5";
+import { VscTerminal } from "react-icons/vsc";
 
 interface Skill {
   id: number;
@@ -73,10 +86,26 @@ const SkillsSection = ({ skills, isLoading }: SkillsSectionProps) => {
       'icon-solidity': <SiSolidity size={18} />,
       'icon-ethereum': <SiEthereum size={18} />,
       'icon-web3': <SiWeb3Dotjs size={18} />,
-      'icon-ipfs': <SiIpfs size={18} />
+      'icon-ipfs': <SiIpfs size={18} />,
+      // New icon mappings
+      'icon-foundry': <GiAnvil size={18} />,
+      'icon-wagmi': <FaLink size={18} />,
+      'icon-firebase': <SiFirebase size={18} />,
+      'icon-hardhat': <GiMiningHelmet size={18} />,
+      'icon-figma': <SiFigma size={18} />,
+      'icon-vercel': <SiVercel size={18} />,
+      'icon-jest': <SiJest size={18} />,
+      'icon-api': <FaPlug size={18} />,
+      'icon-responsive': <MdDevices size={18} />,
+      'icon-design': <MdDesignServices size={18} />,
+      'icon-viem': <SiEthereum size={18} />,
+      'icon-ethers': <SiEthereum size={18} />,
+      'icon-rainbow': <IoRainy size={18} />,
+      'icon-openzeppelin': <FaShieldAlt size={18} />,
+      'icon-express': <SiExpress size={18} />
     };
 
-    return iconMap[iconName] || <div className="w-[18px] h-[18px]" />;
+    return iconMap[iconName] || <VscTerminal size={18} />;
   };
 
   // Category filters
